@@ -1,51 +1,58 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_todo_app/modules/todo_list/models/todo_model.dart';
 
-class TodoState extends Equatable {
+class AddTodoState extends Equatable {
   final bool isLoading;
-  final List<TodoModel>? todoList;
+  final bool isSuccess;
+  final TodoModel? todoModel;
   final String? error;
 
-  const TodoState({
+  const AddTodoState({
     required this.isLoading,
-    this.todoList,
+    required this.isSuccess,
+    this.todoModel,
     this.error,
   });
 
   @override
   List<Object?> get props => [
         isLoading,
-        todoList,
+        isSuccess,
+        todoModel,
         error,
       ];
 
   @override
   String toString() {
     return '''
-    TodoState({
+    AddTodoState({
     isLoading: $isLoading,
-    todoList: $todoList,
+    isSuccess: $isSuccess,
+    todoModel: $todoModel,
     error: $error,
     })
     ''';
   }
 
-  TodoState copyWith({
+  AddTodoState copyWith({
     isLoading,
-    todoList,
+    isSuccess,
+    todoModel,
     error,
   }) {
-    return TodoState(
+    return AddTodoState(
+      isSuccess: isSuccess ?? this.isSuccess,
       isLoading: isLoading ?? this.isLoading,
-      todoList: todoList ?? this.todoList,
+      todoModel: todoModel ?? this.todoModel,
       error: error ?? error,
     );
   }
 
-  factory TodoState.empty() {
-    return const TodoState(
+  factory AddTodoState.empty() {
+    return const AddTodoState(
       isLoading: false,
-      todoList: null,
+      isSuccess: false,
+      todoModel: null,
       error: null,
     );
   }

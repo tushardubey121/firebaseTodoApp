@@ -6,6 +6,17 @@ abstract class TodoEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class UserStatus extends TodoEvent {}
+class FetchTodoList extends TodoEvent {
+  final String userId;
 
-class LoginUser extends TodoEvent {}
+  FetchTodoList({required this.userId});
+
+  @override
+  String toString() {
+    return '''
+    FetchTodoList(
+     userId:$userId,
+    )
+    ''';
+  }
+}

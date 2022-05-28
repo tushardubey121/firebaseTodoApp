@@ -23,6 +23,13 @@ class AppTextStyles {
     fontStyle: FontStyle.normal,
   );
 
+  TextStyle text25w500(Color color) => TextStyle(
+    color: color,
+    fontSize: 25,
+    fontWeight: FontWeight.w500,
+    fontStyle: FontStyle.normal,
+  );
+
   TextStyle text18w400(Color color) => TextStyle(
     color: color,
     fontSize: 18,
@@ -82,6 +89,13 @@ class AppTextStyles {
   TextStyle text12w400(Color color) => TextStyle(
     color: color,
     fontSize: 12,
+    fontWeight: FontWeight.w400,
+    fontStyle: FontStyle.normal,
+  );
+
+  TextStyle text40w400(Color color) => TextStyle(
+    color: color,
+    fontSize: 40,
     fontWeight: FontWeight.w400,
     fontStyle: FontStyle.normal,
   );

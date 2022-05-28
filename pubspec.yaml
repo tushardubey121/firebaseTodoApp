@@ -21,6 +21,7 @@ dependencies:
   firebase_auth: ^3.3.18
   google_sign_in: ^5.3.2
   equatable: ^2.0.3
+  flutter_datetime_picker: ^1.5.1
   shared_preferences: ^2.0.15
 
 dev_dependencies:

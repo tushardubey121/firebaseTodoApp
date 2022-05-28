@@ -1,3 +1,4 @@
+import 'package:firebase_todo_app/modules/add_todo/add_todo_page.dart';
 import 'package:firebase_todo_app/modules/authentication/splash_page.dart';
 import 'package:firebase_todo_app/modules/todo_list/todo_list_page.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ class AppRouter {
     return <String, WidgetBuilder>{
       SplashPage.route(): (BuildContext context) => const SplashPage(),
       TodoListPage.route(): (BuildContext context) => const TodoListPage(),
+      AddTodoPage.route(): (BuildContext context) => const AddTodoPage(),
     };
   }
 
