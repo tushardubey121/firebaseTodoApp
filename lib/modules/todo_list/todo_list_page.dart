@@ -24,12 +24,11 @@ class TodoListPage extends StatefulWidget {
 class _TodoListPageState extends State<TodoListPage> {
   late TodoBloc _todoBloc;
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _todoBloc = TodoBloc();
-    _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId??""));
+    _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? ""));
   }
 
   @override
@@ -39,34 +38,41 @@ class _TodoListPageState extends State<TodoListPage> {
         backgroundColor: AppColors.color0xFF3465CD,
         child: const Icon(Icons.add),
         onPressed: () {
-          Navigator.pushNamed(context, AddTodoPage.route()).then((value){
-            if(value != null && value == true){
-              _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId??""));
+          Navigator.pushNamed(context, AddTodoPage.route(), arguments: AddTodoPageArg(false, null)).then((value) {
+            if (value != null && value == true) {
+              _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? ""));
             }
           });
         },
       ),
       body: BlocProvider(
         create: (BuildContext context) => _todoBloc,
-        child: BlocConsumer<TodoBloc,TodoState>(
+        child: BlocConsumer<TodoBloc, TodoState>(
           listener: _handleState,
-          builder: (context,state){
+          builder: (context, state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 MountainWithDetailsWidget(state.todoList),
                 Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Text(AppStrings.inbox.toUpperCase(),style: AppTextStyles.of(context).text14w700(Colors.grey),),
+                  child: Text(
+                    AppStrings.inbox.toUpperCase(),
+                    style: AppTextStyles.of(context).text14w700(Colors.grey),
+                  ),
                 ),
-                state.todoList !=null && state.todoList!.isNotEmpty
+                state.todoList != null && state.todoList!.isNotEmpty
                     ? _showTodoList(state.todoList!)
                     : Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(50.0),
-                        child: Text(AppStrings.noTodoAddOne.toUpperCase(),style: AppTextStyles.of(context).text14w700(Colors.grey),textAlign: TextAlign.center,),
+                        child: Padding(
+                          padding: const EdgeInsets.all(50.0),
+                          child: Text(
+                            AppStrings.noTodoAddOne.toUpperCase(),
+                            style: AppTextStyles.of(context).text14w700(Colors.grey),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ),
-                    ),
               ],
             );
           },
@@ -79,10 +85,24 @@ class _TodoListPageState extends State<TodoListPage> {
     return Expanded(
       child: ListView.separated(
         padding: const EdgeInsets.all(20),
-        itemBuilder: (context,index){
-          return TodoCard(todoList[index]);
+        itemBuilder: (context, index) {
+          return TodoCard(
+            todoItem: todoList[index],
+            onDelete: () {
+              _todoBloc.add(DeleteTodo(docId: todoList[index].docId ?? ""));
+            },
+            onEdit: () {
+              Navigator.pushNamed(context, AddTodoPage.route(), arguments: AddTodoPageArg(true, todoList[index].docId)).then((value) {
+                if (value != null && value == true) {
+                  _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? ""));
+                }
+              });
+            },
+          );
         },
-        separatorBuilder: (context,index){return Divider();},
+        separatorBuilder: (context, index) {
+          return const Divider();
+        },
         itemCount: todoList.length,
         shrinkWrap: true,
       ),
@@ -90,8 +110,11 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   void _handleState(BuildContext context, TodoState state) {
-    if(!state.isLoading && state.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error??"")));
+    if (!state.isLoading && state.error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error ?? "")));
+    }
+    if (!state.isLoading && state.deleteTodoSuccess) {
+      _todoBloc.add(FetchTodoList(userId: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? ""));
     }
   }
 }

@@ -15,10 +15,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
+class AddTodoPageArg {
+  bool isEdit;
+  String? docId;
+
+  AddTodoPageArg(this.isEdit, this.docId);
+}
+
 class AddTodoPage extends StatefulWidget {
   static String route() => 'AddTodoPage';
 
-  const AddTodoPage({Key? key}) : super(key: key);
+  final AddTodoPageArg arg;
+
+  const AddTodoPage({required this.arg, Key? key}) : super(key: key);
 
   @override
   State<AddTodoPage> createState() => _AddTodoPageState();
@@ -39,9 +48,12 @@ class _AddTodoPageState extends State<AddTodoPage> {
   late AddTodoBloc _addTodoBloc;
 
   @override
-  void initState() {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _addTodoBloc = AddTodoBloc();
-    super.initState();
+    if (widget.arg.isEdit) {
+      _addTodoBloc.add(FetchTodoData(docId: widget.arg.docId ?? ""));
+    }
   }
 
   @override
@@ -66,16 +78,16 @@ class _AddTodoPageState extends State<AddTodoPage> {
         centerTitle: true,
         title: Text(
           AppStrings.addNewThings,
-          style:
-              AppTextStyles.of(context).text18w400(AppColors.color0xFFFFFFFF),
+          style: AppTextStyles.of(context).text18w400(AppColors.color0xFFFFFFFF),
         ),
       ),
       body: BlocProvider(
         create: (BuildContext context) => _addTodoBloc,
-        child: BlocConsumer<AddTodoBloc,AddTodoState>(
+        child: BlocConsumer<AddTodoBloc, AddTodoState>(
           listener: _handleState,
+          buildWhen: (a, b) => a != b && a.todoModel != null && !a.isLoading,
           builder: (BuildContext context, AddTodoState? state) {
-            if(state!.isLoading){
+            if (state!.isLoading) {
               return Container(
                 width: double.maxFinite,
                 height: double.maxFinite,
@@ -106,8 +118,9 @@ class _AddTodoPageState extends State<AddTodoPage> {
                   TextInput(
                     controller: _time,
                     hintText: AppStrings.time,
-                    onTap: (){
-                      DatePicker.showDateTimePicker(context,
+                    onTap: () {
+                      DatePicker.showDateTimePicker(
+                        context,
                         showTitleActions: true,
                         minTime: DateTime.now(),
                         maxTime: DateTime.now().add(const Duration(days: 365)),
@@ -124,7 +137,8 @@ class _AddTodoPageState extends State<AddTodoPage> {
                           log('confirm $date');
                           _time.text = date.toLocal().toString().split('.').first;
                         },
-                        currentTime: DateTime.now(), locale: LocaleType.en,
+                        currentTime: DateTime.now(),
+                        locale: LocaleType.en,
                       );
                     },
                   ),
@@ -148,9 +162,7 @@ class _AddTodoPageState extends State<AddTodoPage> {
       height: 45,
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(30)),
-          border: Border.all(color: Colors.white60, width: 1)),
+      decoration: BoxDecoration(borderRadius: const BorderRadius.all(Radius.circular(30)), border: Border.all(color: Colors.white60, width: 1)),
       child: Image.asset(
         'assets/paint_tool.png',
         color: Colors.white60,
@@ -159,15 +171,24 @@ class _AddTodoPageState extends State<AddTodoPage> {
   }
 
   _dropdown() {
+    if (widget.arg.isEdit && !_addTodoBloc.state.isSuccess && _addTodoBloc.state.todoModel != null) {
+      if (_addTodoBloc.state.todoModel?.todoType == 1) {
+        _selectedTodoType = SelectItem('Personal', SelectItem('Personal', 1));
+        _todoTypeController.value.copyWith(text: "Personal");
+        _todoTypeController.text = "Personal";
+      } else {
+        _selectedTodoType = SelectItem('Business', SelectItem('Business', 2));
+        _todoTypeController.text = "Business";
+        _todoTypeController.value.copyWith(text: "Business");
+      }
+    }
     return SelectInput(
       controller: _todoTypeController,
       hintText: AppStrings.selectTodoType,
       textInputAction: TextInputAction.done,
-      textStyle:
-          AppTextStyles.of(context).text16w400(AppColors.color0xFFFFFFFF),
+      textStyle: AppTextStyles.of(context).text16w400(AppColors.color0xFFFFFFFF),
       hintTextStyle: AppTextStyles.of(context).text16w400(Colors.white54),
-      items: List.generate(_todoType.length,
-          (index) => SelectItem(_todoType[index].label, _todoType[index])),
+      items: List.generate(_todoType.length, (index) => SelectItem(_todoType[index].label, _todoType[index])),
       onFieldSubmitted: (selectedItem) {
         _selectedTodoType = selectedItem;
       },
@@ -177,26 +198,41 @@ class _AddTodoPageState extends State<AddTodoPage> {
 
   _button() {
     return InkWell(
-      onTap: (){
-        if(_selectedTodoType == null){
+      onTap: () {
+        if (_selectedTodoType == null) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.selectTodoType)));
-        } else if(_message.text.trim().isEmpty){
+        } else if (_message.text.trim().isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.addMessage)));
-        } else if(_place.text.trim().isEmpty){
+        } else if (_place.text.trim().isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.addPlace)));
-        } else if(_time.text.trim().isEmpty){
+        } else if (_time.text.trim().isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.addTime)));
-        }else{
-          _addTodoBloc.add(
-              AddTodo(request: AddTodoRequest(
-                createdBy: BlocProvider.of<AppBloc>(context).state.userDetail?.userId??"",
-                message: _message.text.trim(),
-                place: _place.text.trim(),
-                time: _time.text.trim(),
-                todoType: _selectedTodoType?.value?.value,
-                notification: _notification.text.trim(),
-              ))
-          );
+        } else {
+          if (widget.arg.isEdit) {
+            _addTodoBloc.add(
+              UpdateTodo(
+                request: AddTodoRequest(
+                  createdBy: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? "",
+                  message: _message.text.trim(),
+                  place: _place.text.trim(),
+                  time: _time.text.trim(),
+                  todoType: _selectedTodoType?.value?.value,
+                  notification: _notification.text.trim(),
+                ),
+                docId: widget.arg.docId ?? "",
+              ),
+            );
+          } else {
+            _addTodoBloc.add(AddTodo(
+                request: AddTodoRequest(
+              createdBy: BlocProvider.of<AppBloc>(context).state.userDetail?.userId ?? "",
+              message: _message.text.trim(),
+              place: _place.text.trim(),
+              time: _time.text.trim(),
+              todoType: _selectedTodoType?.value?.value,
+              notification: _notification.text.trim(),
+            )));
+          }
         }
       },
       child: Container(
@@ -217,12 +253,24 @@ class _AddTodoPageState extends State<AddTodoPage> {
   }
 
   void _handleState(BuildContext context, AddTodoState state) {
-    if(state.isSuccess){
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.todoAddSuccess)));
-      Navigator.pop(context,true);
-    }else {
-      if(!state.isLoading) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error??"")));
+    if (state.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(widget.arg.isEdit ? AppStrings.todoAddSuccess : AppStrings.todoAddSuccess)));
+      Navigator.pop(context, true);
+    } else if (!state.isSuccess && state.todoModel != null) {
+      if (state.todoModel?.todoType == 1) {
+        _selectedTodoType = SelectItem('Personal', SelectItem('Personal', 1));
+        _todoTypeController.text = "Personal";
+      } else {
+        _selectedTodoType = SelectItem('Business', SelectItem('Business', 2));
+        _todoTypeController.text = "Business";
+      }
+      _message.text = state.todoModel?.message ?? "";
+      _place.text = state.todoModel?.place ?? "";
+      _time.text = state.todoModel?.time ?? "";
+      _notification.text = state.todoModel?.notification ?? "";
+    } else {
+      if (!state.isLoading) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error ?? "")));
       }
     }
   }

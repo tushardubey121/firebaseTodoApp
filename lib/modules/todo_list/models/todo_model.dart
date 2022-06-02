@@ -5,6 +5,7 @@ class TodoModel {
   String? time;
   String? notification;
   String? createdBy;
+  String? docId;
 
   TodoModel({
     this.todoType,
@@ -13,6 +14,7 @@ class TodoModel {
     this.time,
     this.notification,
     this.createdBy,
+    this.docId,
   });
 
   TodoModel.fromJson(Map<String, dynamic> json) {

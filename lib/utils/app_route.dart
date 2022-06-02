@@ -12,7 +12,9 @@ class AppRouter {
     return <String, WidgetBuilder>{
       SplashPage.route(): (BuildContext context) => const SplashPage(),
       TodoListPage.route(): (BuildContext context) => const TodoListPage(),
-      AddTodoPage.route(): (BuildContext context) => const AddTodoPage(),
+      AddTodoPage.route(): (BuildContext context) => AddTodoPage(
+            arg: ModalRoute.of(context)!.settings.arguments as AddTodoPageArg,
+          ),
     };
   }
 

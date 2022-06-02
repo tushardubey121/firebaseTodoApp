@@ -26,6 +26,7 @@ class AppStrings {
   static const String addYourThing = 'Add your thing';
 
   static const String todoAddSuccess = 'Todo Add Successfully';
+  static const String todoUpdateSuccess = 'Todo Update Successfully';
 
   static const String addMessage = 'Please add message';
 
@@ -34,4 +35,6 @@ class AppStrings {
   static const String addTime = 'Please add time';
 
   static const String noTodoAddOne = "Look like you don't have any todo? Add new.";
+
+  static const String delete = 'Delete';
 }

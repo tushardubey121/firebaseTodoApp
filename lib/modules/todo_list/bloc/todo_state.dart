@@ -3,11 +3,13 @@ import 'package:firebase_todo_app/modules/todo_list/models/todo_model.dart';
 
 class TodoState extends Equatable {
   final bool isLoading;
+  final bool deleteTodoSuccess;
   final List<TodoModel>? todoList;
   final String? error;
 
   const TodoState({
     required this.isLoading,
+    required this.deleteTodoSuccess,
     this.todoList,
     this.error,
   });
@@ -15,6 +17,7 @@ class TodoState extends Equatable {
   @override
   List<Object?> get props => [
         isLoading,
+        deleteTodoSuccess,
         todoList,
         error,
       ];
@@ -24,6 +27,7 @@ class TodoState extends Equatable {
     return '''
     TodoState({
     isLoading: $isLoading,
+    deleteTodoSuccess: $deleteTodoSuccess,
     todoList: $todoList,
     error: $error,
     })
@@ -32,10 +36,12 @@ class TodoState extends Equatable {
 
   TodoState copyWith({
     isLoading,
+    deleteTodoSuccess,
     todoList,
     error,
   }) {
     return TodoState(
+      deleteTodoSuccess: deleteTodoSuccess ?? this.deleteTodoSuccess,
       isLoading: isLoading ?? this.isLoading,
       todoList: todoList ?? this.todoList,
       error: error ?? error,
@@ -44,6 +50,7 @@ class TodoState extends Equatable {
 
   factory TodoState.empty() {
     return const TodoState(
+      deleteTodoSuccess: false,
       isLoading: false,
       todoList: null,
       error: null,
